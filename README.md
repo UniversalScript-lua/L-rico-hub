@@ -1,500 +1,733 @@
 --[[
-    FRUIT BATTLEGROUNDS - PLÍNIO HUB
-    FOV estilo Blox Fruits | Painel arrastável + Teleporte
-    Discord: https://discord.gg/VNjfq35gPQ
-    ⚠️ Todas as funções DESATIVADAS por padrão
+    ⚔️ PLÍNIO HUB — PARTE 1/3: ANIMAÇÃO
+    ✅ Continua perfeita e sincronizada
+]]
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local FIRST_SOUND = "rbxassetid://116866873116581"
+local SECOND_SOUND = "rbxassetid://95724647330605"
+local IMAGE_ID = "rbxassetid://113064380426857"
+
+local CORES = {
+	PRETO = Color3.fromRGB(0, 0, 0),
+	VINHO_ESCURO = Color3.fromRGB(80, 10, 20),
+	VINHO_MEDIO = Color3.fromRGB(130, 20, 35),
+	VINHO_CLARO = Color3.fromRGB(180, 40, 60),
+	VINHO_GLOW = Color3.fromRGB(200, 50, 75),
+}
+
+local CENTER = UDim2.fromScale(0.5, 0.5)
+
+for _, name in ipairs({"RinneganEffectV7"}) do
+	local old = playerGui:FindFirstChild(name)
+	if old then old:Destroy() end
+end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "RinneganEffectV7"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = 999999
+gui.Parent = playerGui
+
+local function tween(obj, dur, props, style, dir)
+	local info = TweenInfo.new(dur, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out)
+	local t = TweenService:Create(obj, info, props)
+	t:Play()
+	return t
+end
+
+local function circle(obj)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(1, 0)
+	c.Parent = obj
+end
+
+local function makeFrame(name, zIndex)
+	local f = Instance.new("Frame")
+	f.Name = name
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.Position = CENTER
+	f.Size = UDim2.fromScale(1, 1)
+	f.BackgroundTransparency = 1
+	f.BorderSizePixel = 0
+	f.ZIndex = zIndex
+	f.Parent = gui
+	return f
+end
+
+local darkness = makeFrame("Darkness", 1)
+darkness.BackgroundColor3 = CORES.PRETO
+
+local topBar = Instance.new("Frame")
+topBar.Name = "TopBar"
+topBar.Size = UDim2.new(1,0,0,0)
+topBar.Position = UDim2.fromOffset(0,0)
+topBar.BackgroundColor3 = CORES.PRETO
+topBar.ZIndex = 55
+topBar.Parent = gui
+
+local bottomBar = Instance.new("Frame")
+bottomBar.Name = "BottomBar"
+bottomBar.AnchorPoint = Vector2.new(0,1)
+bottomBar.Size = UDim2.new(1,0,0,0)
+bottomBar.Position = UDim2.fromScale(0,1)
+bottomBar.BackgroundColor3 = CORES.PRETO
+bottomBar.ZIndex = 55
+bottomBar.Parent = gui
+
+local purpleFlash = makeFrame("RedFlash", 60)
+purpleFlash.BackgroundColor3 = CORES.VINHO_MEDIO
+
+local whiteFlash = makeFrame("WhiteFlash", 61)
+whiteFlash.BackgroundColor3 = Color3.fromRGB(255,245,240)
+
+local rinnegan = Instance.new("ImageLabel")
+rinnegan.Name = "Rinnegan"
+rinnegan.AnchorPoint = Vector2.new(0.5, 0.5)
+rinnegan.Position = CENTER
+rinnegan.Size = UDim2.fromOffset(1, 1)
+rinnegan.BackgroundTransparency = 1
+rinnegan.Image = IMAGE_ID
+rinnegan.ImageTransparency = 1
+rinnegan.ZIndex = 20
+rinnegan.Parent = gui
+circle(rinnegan)
+
+local sound1 = Instance.new("Sound")
+sound1.SoundId = FIRST_SOUND
+sound1.Volume = 1
+sound1.Parent = gui
+
+local sound2 = Instance.new("Sound")
+sound2.SoundId = SECOND_SOUND
+sound2.Volume = 1
+sound2.Parent = gui
+
+local function shockwave(finalSize, duration, thickness)
+	local ring = Instance.new("Frame")
+	ring.AnchorPoint = Vector2.new(0.5,0.5)
+	ring.Position = CENTER
+	ring.Size = UDim2.fromOffset(5,5)
+	ring.BackgroundTransparency = 1
+	ring.Parent = gui
+	circle(ring)
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = thickness
+	stroke.Color = CORES.VINHO_GLOW
+	stroke.Parent = ring
+	tween(ring, duration, {Size = UDim2.fromOffset(finalSize,finalSize)}, Enum.EasingStyle.Quart)
+	tween(stroke, duration, {Transparency = 1, Thickness = 1}, Enum.EasingStyle.Quad)
+	task.delay(duration + 0.1, function() ring:Destroy() end)
+end
+
+local function particleBurst(amount)
+	for i = 1, amount do
+		local p = Instance.new("Frame")
+		p.AnchorPoint = Vector2.new(0.5,0.5)
+		p.Position = CENTER
+		p.Size = UDim2.fromOffset(math.random(2,6), math.random(2,6))
+		p.BackgroundColor3 = Color3.fromRGB(math.random(120,200), math.random(15,50), math.random(20,60))
+		p.Parent = gui
+		circle(p)
+		local ang = math.rad(math.random(0,359))
+		local dist = math.random(150,400)
+		tween(p, math.random(8,15)/10, {
+			Position = UDim2.new(0.5, math.cos(ang)*dist, 0.5, math.sin(ang)*dist),
+			Size = UDim2.fromOffset(0,0),
+			BackgroundTransparency = 1
+		}, Enum.EasingStyle.Quart)
+	end
+end
+
+local function PlayIntro()
+	rinnegan.Size = UDim2.fromOffset(1,1)
+	rinnegan.ImageTransparency = 1
+	darkness.BackgroundTransparency = 1
+	purpleFlash.BackgroundTransparency = 1
+	whiteFlash.BackgroundTransparency = 1
+	topBar.Size = UDim2.new(1,0,0,0)
+	bottomBar.Size = UDim2.new(1,0,0,0)
+
+	tween(darkness, 0.7, {BackgroundTransparency = 0.35}, Enum.EasingStyle.Sine)
+	tween(topBar, 0.6, {Size = UDim2.new(1,0,0,50)}, Enum.EasingStyle.Quart)
+	tween(bottomBar, 0.6, {Size = UDim2.new(1,0,0,50)}, Enum.EasingStyle.Quart)
+	sound1:Play()
+	task.wait(1.7)
+
+	whiteFlash.BackgroundTransparency = 0.8
+	tween(whiteFlash, 0.15, {BackgroundTransparency = 1}, Enum.EasingStyle.Quad)
+	purpleFlash.BackgroundTransparency = 0.5
+	tween(purpleFlash, 0.45, {BackgroundTransparency = 1}, Enum.EasingStyle.Quart)
+	sound2:Play()
+
+	rinnegan.ImageTransparency = 0
+	tween(rinnegan, 0.3, {Size = UDim2.fromOffset(220,220)}, Enum.EasingStyle.Exponential)
+	task.wait(0.25)
+	tween(rinnegan, 0.35, {Size = UDim2.fromOffset(280,280)}, Enum.EasingStyle.Back)
+	task.wait(0.25)
+	tween(rinnegan, 0.2, {Size = UDim2.fromOffset(270,270)}, Enum.EasingStyle.Quart)
+
+	task.wait(0.3)
+	shockwave(300, 0.7, 5)
+	task.delay(0.15, function() shockwave(450, 0.9, 4) end)
+	task.delay(0.3, function() shockwave(600, 1.1, 3) end)
+	particleBurst(50)
+
+	task.wait(2.0)
+	tween(rinnegan, 0.6, {Size = UDim2.fromOffset(350,350), ImageTransparency = 1}, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+	tween(darkness, 0.6, {BackgroundTransparency = 1}, Enum.EasingStyle.Sine)
+	tween(topBar, 0.5, {Size = UDim2.new(1,0,0,0)}, Enum.EasingStyle.Quart)
+	tween(bottomBar, 0.5, {Size = UDim2.new(1,0,0,0)}, Enum.EasingStyle.Quart)
+	task.wait(0.6)
+
+	gui:Destroy()
+	player:SetAttribute("PlinioReady", true)
+end
+
+PlayIntro()
+--[[
+    ⚔️ PLÍNIO HUB — PARTE 2/3: BASE
+    ✅ Speed + Super Jump + ESP + AutoAim + Teleport
 ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local Mouse = LocalPlayer:GetMouse()
+local LocalPlayer = Players.LocalPlayer
 
--- ========== CONFIGURAÇÕES (TUDO DESATIVADO POR PADRÃO) ==========
 local Settings = {
     AutoAim = false,
-    AutoHeal = false,
+    Speed = false,
+    SuperJump = false,
     ESP = false,
     FOVRadius = 150,
     ShowFOV = false,
-    ShowLine = false,
     TeleportLock = false,
-    TargetPlayerName = ""
+    TargetPlayer = nil
 }
-
 _G.PlinioHub = Settings
 
--- ========== VARIAVEIS ==========
 local CurrentTarget = nil
 local ESPObjects = {}
 local FOVCircle = nil
-local AimLine = nil
-local isRunning = true
-local GuiMain = nil
-local isMinimized = false
-local Dragging = false
-local DragStart = nil
-local StartPos = nil
-local TeleportTarget = nil
+local OriginalSpeed = 16
+local OriginalJump = 50
+_G.FOVUI = nil
 
--- ========== FUNÇÃO: Ver se o alvo está visível ==========
 local function CanSeeTarget(targetPart)
     if not targetPart then return false end
     local origin = Camera.CFrame.Position
     local direction = (targetPart.Position - origin).Unit
     local distance = (targetPart.Position - origin).Magnitude
     local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Blacklist
+    params.FilterType = Enum.RaycastFilterType.Exclude
     params.FilterDescendantsInstances = {LocalPlayer.Character}
-    params.IgnoreWater = true
     local result = workspace:Raycast(origin, direction * distance, params)
-    if result then
-        local hit = result.Instance
-        local targetParent = targetPart.Parent
-        if targetParent and hit:IsDescendantOf(targetParent) then return true end
-        return false
-    end
-    return true
+    if not result then return true end
+    local hitModel = result.Instance:FindFirstAncestorWhichIsA("Model")
+    local targetModel = targetPart:FindFirstAncestorWhichIsA("Model")
+    return hitModel == targetModel
 end
 
--- ========== PEGAR ALVOS NO FOV ==========
 local function GetTargetsInFOV()
     local targets = {}
     local center = Camera.ViewportSize / 2
-    local radius = Settings.FOVRadius
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") then
-            local humanoid = player.Character.Humanoid
-            if humanoid.Health > 0 then
-                local part = player.Character:FindFirstChild("Head") or player.Character:FindFirstChild("HumanoidRootPart")
-                if part then
-                    local pos, onScreen = Camera:WorldToViewportPoint(part.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                        if dist <= radius and CanSeeTarget(part) then
-                            table.insert(targets, {Player=player, Part=part, Distance=dist, Position=part.Position})
-                        end
+        if player ~= LocalPlayer and player.Character then
+            local hum = player.Character:FindFirstChild("Humanoid")
+            local head = player.Character:FindFirstChild("Head")
+            if hum and head and hum.Health > 0 then
+                local pos, onScreen = Camera:WorldToViewportPoint(head.Position)
+                if onScreen then
+                    local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(center.X, center.Y)).Magnitude
+                    if dist <= Settings.FOVRadius and CanSeeTarget(head) then
+                        table.insert(targets, {
+                            Player = player,
+                            Part = head,
+                            Distance = dist,
+                            Position = head.Position
+                        })
                     end
                 end
             end
         end
     end
-    table.sort(targets, function(a,b) return a.Distance < b.Distance end)
+    table.sort(targets, function(a, b) return a.Distance < b.Distance end)
     return targets
 end
 
--- ========== MIRA AUTOMÁTICA ==========
-local function UpdateAim()
-    if not Settings.AutoAim then CurrentTarget=nil return end
+local function CreateFOV()
+    if _G.FOVUI then return end
+    local fovGui = Instance.new("ScreenGui")
+    fovGui.Name = "PlinioFOV"
+    fovGui.ResetOnSpawn = false
+    fovGui.IgnoreGuiInset = true
+    fovGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    _G.FOVUI = fovGui
+
+    local circle = Instance.new("Frame")
+    circle.Name = "FOVCircle"
+    circle.Size = UDim2.new(0, Settings.FOVRadius*2, 0, Settings.FOVRadius*2)
+    circle.Position = UDim2.new(0.5, -Settings.FOVRadius, 0.5, -Settings.FOVRadius)
+    circle.BackgroundTransparency = 1
+    circle.BorderSizePixel = 0
+    circle.Visible = Settings.ShowFOV
+    circle.Parent = fovGui
+    Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 2
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.Transparency = 0.1
+    stroke.Parent = circle
+
+    FOVCircle = circle
+end
+
+RunService.RenderStepped:Connect(function()
+    if not FOVCircle then CreateFOV() return end
+    FOVCircle.Visible = Settings.ShowFOV
+    FOVCircle.Size = UDim2.new(0, Settings.FOVRadius*2, 0, Settings.FOVRadius*2)
+    FOVCircle.Position = UDim2.new(0.5, -Settings.FOVRadius, 0.5, -Settings.FOVRadius)
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not Settings.AutoAim then
+        CurrentTarget = nil
+        return
+    end
     local targets = GetTargetsInFOV()
     if #targets > 0 then
-        local target = targets[1]
-        CurrentTarget = target.Player
-        local current = Camera.CFrame
-        local targetCF = CFrame.lookAt(Camera.CFrame.Position, target.Position)
-        Camera.CFrame = current:Lerp(targetCF, 0.25)
+        CurrentTarget = targets[1].Player
+        local targetPos = targets[1].Position
+        local newCF = CFrame.lookAt(Camera.CFrame.Position, targetPos)
+        Camera.CFrame = Camera.CFrame:Lerp(newCF, 0.2)
     else
         CurrentTarget = nil
     end
-end
+end)
 
--- ========== AUTO HEAL ==========
-local function AutoHeal()
-    if not Settings.AutoHeal then return end
-    local char = LocalPlayer.Character
-    if not char then return end
-    local humanoid = char:FindFirstChild("Humanoid")
-    if not humanoid then return end
-    if humanoid.Health < 50 then
-        pcall(function()
-            local inv = LocalPlayer:FindFirstChild("Inventory")
-            if inv then
-                for _, item in pairs(inv:GetChildren()) do
-                    if item.Name:lower():find("heal") or item.Name:lower():find("cura") or item.Name:lower():find("potion") then
-                        local remote = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-                        if remote then
-                            local useItem = remote:FindFirstChild("UseItem")
-                            if useItem then useItem:FireServer(item) break end
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end
-
--- ========== ESP ==========
-local function UpdateESP()
-    for _, obj in pairs(ESPObjects) do pcall(function() obj:Destroy() end) end
+RunService.Heartbeat:Connect(function()
+    for _, h in pairs(ESPObjects) do pcall(function() h:Destroy() end) end
     ESPObjects = {}
     if not Settings.ESP then return end
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
-            local highlight = Instance.new("Highlight")
-            highlight.FillColor = Color3.fromRGB(255,0,0)
-            highlight.FillTransparency = 0.4
-            highlight.OutlineColor = Color3.fromRGB(255,255,255)
-            highlight.OutlineTransparency = 0
-            highlight.Adornee = player.Character
-            highlight.Parent = player.Character
-            table.insert(ESPObjects, highlight)
+            local hum = player.Character:FindFirstChild("Humanoid")
+            if hum and hum.Health > 0 then
+                local hl = Instance.new("Highlight")
+                hl.Name = "ESP"
+                hl.FillColor = Color3.fromRGB(255, 0, 0)
+                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                hl.FillTransparency = 0.5
+                hl.OutlineTransparency = 0
+                hl.Adornee = player.Character
+                hl.Parent = player.Character
+                table.insert(ESPObjects, hl)
+            end
         end
     end
-end
-
--- ========== TELEPORTE + TRAVAR ==========
-local function UpdateTeleportLock()
-    if not Settings.TeleportLock or Settings.TargetPlayerName == "" then
-        TeleportTarget = nil
-        return
-    end
-    local targetPlayer = nil
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and string.find(string.lower(player.Name), string.lower(Settings.TargetPlayerName), 1, true) then
-            targetPlayer = player break
-        end
-    end
-    if not targetPlayer or not targetPlayer.Character then
-        TeleportTarget = nil
-        return
-    end
-    TeleportTarget = targetPlayer
-    local localChar = LocalPlayer.Character
-    local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-    local localRoot = localChar and localChar:FindFirstChild("HumanoidRootPart")
-    if localRoot and targetRoot then
-        pcall(function() localChar.HumanoidRootPart.CFrame = targetRoot.CFrame * CFrame.new(0,3,0) end)
-    end
-end
-
--- ========== CÍRCULO FOV ==========
-local function CreateFOVCircle()
-    if FOVCircle then pcall(function() FOVCircle:Destroy() end) FOVCircle=nil end
-    if AimLine then pcall(function() AimLine:Destroy() end) AimLine=nil end
-    FOVCircle = Drawing.new("Circle")
-    FOVCircle.Visible = false
-    FOVCircle.Color = Color3.fromRGB(255,0,0)
-    FOVCircle.Radius = Settings.FOVRadius
-    FOVCircle.Thickness = 2
-    FOVCircle.Filled = false
-    FOVCircle.Transparency = 1
-    AimLine = Drawing.new("Line")
-    AimLine.Thickness = 2
-    AimLine.Color = Color3.fromRGB(255,0,0)
-    AimLine.Transparency = 1
-    AimLine.Visible = false
-end
-
--- ========== ATUALIZAR FOV ==========
-RunService.RenderStepped:Connect(function()
-    local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-    if Settings.ShowFOV and Settings.AutoAim and FOVCircle then
-        FOVCircle.Visible = true
-        FOVCircle.Position = center
-        FOVCircle.Radius = Settings.FOVRadius
-    elseif FOVCircle then
-        FOVCircle.Visible = false
-    end
-    if Settings.ShowLine and Settings.AutoAim and CurrentTarget and CurrentTarget.Character and AimLine then
-        local part = CurrentTarget.Character:FindFirstChild("Head") or CurrentTarget.Character:FindFirstChild("HumanoidRootPart")
-        if part then
-            local pos, onScreen = Camera:WorldToViewportPoint(part.Position)
-            if onScreen then
-                AimLine.Visible = true
-                AimLine.From = center
-                AimLine.To = Vector2.new(pos.X, pos.Y)
-            else AimLine.Visible = false end
-        end
-    elseif AimLine then AimLine.Visible = false end
 end)
 
--- ========== LOOP PRINCIPAL ==========
-local function MainLoop()
-    if not isRunning then return end
-    pcall(function()
-        UpdateAim()
-        AutoHeal()
-        UpdateESP()
-        UpdateTeleportLock()
-    end)
+RunService.Heartbeat:Connect(function()
+    if not Settings.TeleportLock or not Settings.TargetPlayer then return end
+    local myChar = LocalPlayer.Character
+    local tChar = Settings.TargetPlayer.Character
+    if not myChar or not tChar then return end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    local tRoot = tChar:FindFirstChild("HumanoidRootPart")
+    if myRoot and tRoot then
+        myRoot.CFrame = tRoot.CFrame * CFrame.new(0, 2.5, 0)
+    end
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then return end
+
+    if Settings.Speed then
+        hum.WalkSpeed = 55
+    else
+        hum.WalkSpeed = OriginalSpeed
+    end
+
+    if Settings.SuperJump then
+        hum.JumpPower = 120
+    else
+        hum.JumpPower = OriginalJump
+    end
+end)
+
+task.spawn(CreateFOV)
+--[[
+    ⚔️ PLÍNIO HUB — PARTE 3/3: FECHAR DIRETO
+    ✅ Botão X → fecha direto, sem confirmação
+    ✅ Ao fechar → desativa TODAS as funções automaticamente
+    ✅ Painel largo e arrumado como combinado
+]]
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Settings = _G.PlinioHub
+
+-- ✅ DESATIVA TUDO AO FECHAR
+local function DesativarTudo()
+    Settings.AutoAim = false
+    Settings.Speed = false
+    Settings.SuperJump = false
+    Settings.ESP = false
+    Settings.ShowFOV = false
+    Settings.TeleportLock = false
+    Settings.TargetPlayer = nil
 end
-RunService.RenderStepped:Connect(MainLoop)
--- ========== GUI — BOTÕES IGUAIS DA IMAGEM: □ Amarelo | ✕ Vermelho ==========
-local function CreateGUI()
-    if GuiMain then pcall(function() GuiMain:Destroy() end) GuiMain=nil end
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "PlinioHub"
-    screenGui.ResetOnSpawn = false
-    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-    GuiMain = screenGui
 
-    -- FRAME PRINCIPAL
-    local main = Instance.new("Frame")
-    main.Size = UDim2.new(0, 180, 0, 310)
-    main.Position = UDim2.new(0.02,0,0.2,0)
-    main.BackgroundColor3 = Color3.fromRGB(22, 22, 33)
-    main.BackgroundTransparency = 0.1
-    main.BorderSizePixel = 0
-    main.ClipsDescendants = true
-    main.Parent = screenGui
-    main.Active = true
-    main.Draggable = false
+local function OpenPanel()
+    local old = PlayerGui:FindFirstChild("PlinioHubUI")
+    if old then old:Destroy() end
 
-    Instance.new("UICorner", main).CornerRadius = UDim.new(0,6)
-    local stroke = Instance.new("UIStroke", main)
-    stroke.Color = Color3.fromRGB(255,0,0)
-    stroke.Thickness = 1.5
-    stroke.Transparency = 0.4
+    local Gui = Instance.new("ScreenGui")
+    Gui.Name = "PlinioHubUI"
+    Gui.ResetOnSpawn = false
+    Gui.Parent = PlayerGui
 
-    -- 📌 CABEÇALHO — Fundo vermelho igual da imagem
-    local header = Instance.new("Frame")
-    header.Size = UDim2.new(1,0,0,32)
-    header.BackgroundColor3 = Color3.fromRGB(200, 25, 25)
-    header.BorderSizePixel = 0
-    header.Parent = main
-    header.Active = true
-    Instance.new("UICorner", header).CornerRadius = UDim.new(0,6)
+    -- 📦 PAINEL PRINCIPAL
+    local Main = Instance.new("Frame")
+    Main.Size = UDim2.new(0, 380, 0, 320)
+    Main.Position = UDim2.new(0.02, 0, 0.12, 0)
+    Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    Main.Active = true
+    Main.ClipsDescendants = true
+    Main.Parent = Gui
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+    local Stroke = Instance.new("UIStroke", Main)
+    Stroke.Color = Color3.fromRGB(190, 0, 0)
+    Stroke.Thickness = 2
 
-    -- ✅ Ícone de espadas antes do nome
-    local icon = Instance.new("TextLabel")
-    icon.Size = UDim2.new(0,16,1,0)
-    icon.Position = UDim2.new(0,6,0,0)
-    icon.BackgroundTransparency = 1
-    icon.Text = "⚔️"
-    icon.Font = Enum.Font.GothamBold
-    icon.TextColor3 = Color3.fromRGB(255,255,255)
-    icon.TextSize = 12
-    icon.Parent = header
+    -- 📌 CABEÇALHO
+    local Header = Instance.new("Frame")
+    Header.Size = UDim2.new(1, 0, 0, 44)
+    Header.BackgroundColor3 = Color3.fromRGB(180, 20, 40)
+    Header.Parent = Main
+    Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 12)
+    Header.Active = true
 
-    -- ✅ NOME DO PAINEL — Branco no cabeçalho vermelho
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(0.45,0,1,0)
-    title.Position = UDim2.new(0,26,0,0)
-    title.BackgroundTransparency = 1
-    title.Text = "Plínio Hub"
-    title.Font = Enum.Font.GothamBold
-    title.TextColor3 = Color3.fromRGB(255,255,255)
-    title.TextSize = 13
-    title.TextXAlignment = Enum.TextXAlignment.Left
-    title.Parent = header
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(0.55, 0, 1, 0)
+    Title.Position = UDim2.new(0, 14, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.Text = "⚔️ Plínio Hub"
+    Title.Font = Enum.Font.GothamBold
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 15
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = Header
 
-    -- 🟨 BOTÃO MINIMIZAR — Amarelo com □ (sem quadrado, só o símbolo)
-    local minBtn = Instance.new("TextButton")
-    minBtn.Size = UDim2.new(0,26,0,22)
-    minBtn.Position = UDim2.new(0.72,0,0.5,-11)
-    minBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-    minBtn.BackgroundTransparency = 0
-    minBtn.Text = "□"
-    minBtn.TextColor3 = Color3.fromRGB(0,0,0)
-    minBtn.TextSize = 14
-    minBtn.Font = Enum.Font.GothamBold
-    minBtn.BorderSizePixel = 0
-    minBtn.Parent = header
-    Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0,4)
+    local MinBtn = Instance.new("TextButton")
+    MinBtn.Size = UDim2.new(0, 32, 0, 32)
+    MinBtn.Position = UDim2.new(0.86, 0, 0.5, -16)
+    MinBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+    MinBtn.Text = "─"
+    MinBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+    MinBtn.TextSize = 20
+    MinBtn.Font = Enum.Font.GothamBold
+    MinBtn.Parent = Header
+    Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 8)
 
-    -- 🟥 BOTÃO FECHAR — Vermelho com ✕ (sem quadrado, só o X)
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0,26,0,22)
-    closeBtn.Position = UDim2.new(0.88,0,0.5,-11)
-    closeBtn.BackgroundColor3 = Color3.fromRGB(220, 30, 30)
-    closeBtn.BackgroundTransparency = 0
-    closeBtn.Text = "✕"
-    closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
-    closeBtn.TextSize = 13
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.BorderSizePixel = 0
-    closeBtn.Parent = header
-    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0,4)
+    -- ❌ BOTÃO FECHAR — FECHA DIRETO
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Size = UDim2.new(0, 32, 0, 32)
+    CloseBtn.Position = UDim2.new(0.94, 0, 0.5, -16)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 30, 30)
+    CloseBtn.Text = "X"
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.TextSize = 18
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.Parent = Header
+    Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 8)
 
-    -- Efeitos hover
-    minBtn.MouseEnter:Connect(function() minBtn.BackgroundTransparency = 0.15 end)
-    minBtn.MouseLeave:Connect(function() minBtn.BackgroundTransparency = 0 end)
-    closeBtn.MouseEnter:Connect(function() closeBtn.BackgroundTransparency = 0.15 end)
-    closeBtn.MouseLeave:Connect(function() closeBtn.BackgroundTransparency = 0 end)
+    -- 📄 CONTEÚDO
+    local Content = Instance.new("Frame")
+    Content.Size = UDim2.new(1, -16, 1, -60)
+    Content.Position = UDim2.new(0, 8, 0, 48)
+    Content.BackgroundTransparency = 1
+    Content.ClipsDescendants = true
+    Content.Parent = Main
 
-    -- CONTEÚDO
-    local content = Instance.new("Frame")
-    content.Size = UDim2.new(1,-10,1,-42)
-    content.Position = UDim2.new(0,5,0,35)
-    content.BackgroundTransparency = 1
-    content.Parent = main
+    -- 🔘 BOTÃO TOGGLE
+    local function CreateToggle(texto, x, y, padrao, acao)
+        local Cont = Instance.new("Frame")
+        Cont.Size = UDim2.new(0, 170, 0, 28)
+        Cont.Position = UDim2.new(0, x, 0, y)
+        Cont.BackgroundTransparency = 1
+        Cont.Parent = Content
 
-    -- TOGGLE
-    local function CreateToggle(text, yPos, default, callback)
-        local frame = Instance.new("Frame")
-        frame.Size = UDim2.new(1,0,0,22)
-        frame.Position = UDim2.new(0,0,0,yPos)
-        frame.BackgroundTransparency = 1
-        frame.Parent = content
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(0.6,0,1,0)
-        label.BackgroundTransparency = 1
-        label.Text = text
-        label.Font = Enum.Font.Gotham
-        label.TextColor3 = Color3.fromRGB(210,210,210)
-        label.TextSize = 10
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.Parent = frame
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0,35,0,18)
-        btn.Position = UDim2.new(0.7,0,0.5,-9)
-        btn.BackgroundColor3 = default and Color3.fromRGB(0,190,70) or Color3.fromRGB(70,70,85)
-        btn.Text = default and "ON" or "OFF"
-        btn.TextColor3 = Color3.fromRGB(255,255,255)
-        btn.TextSize = 9
-        btn.Font = Enum.Font.GothamBold
-        btn.BorderSizePixel = 0
-        btn.Parent = frame
-        Instance.new("UICorner", btn).CornerRadius = UDim.new(0,4)
-        local state = default
-        btn.MouseButton1Click:Connect(function()
-            state = not state
-            btn.BackgroundColor3 = state and Color3.fromRGB(0,190,70) or Color3.fromRGB(70,70,85)
-            btn.Text = state and "ON" or "OFF"
-            callback(state)
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(0, 110, 1, 0)
+        Lbl.BackgroundTransparency = 1
+        Lbl.Text = texto
+        Lbl.Font = Enum.Font.Gotham
+        Lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
+        Lbl.TextSize = 12
+        Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.Parent = Cont
+
+        local Btn = Instance.new("TextButton")
+        Btn.Size = UDim2.new(0, 52, 0, 24)
+        Btn.Position = UDim2.new(1, -54, 0.5, -12)
+        Btn.BackgroundColor3 = padrao and Color3.fromRGB(0, 180, 60) or Color3.fromRGB(55, 55, 75)
+        Btn.Text = padrao and "ON" or "OFF"
+        Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Btn.TextSize = 11
+        Btn.Font = Enum.Font.GothamBold
+        Btn.Parent = Cont
+        Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+
+        local ligado = padrao
+        Btn.MouseButton1Click:Connect(function()
+            ligado = not ligado
+            Btn.BackgroundColor3 = ligado and Color3.fromRGB(0, 180, 60) or Color3.fromRGB(55, 55, 75)
+            Btn.Text = ligado and "ON" or "OFF"
+            acao(ligado)
         end)
     end
 
-    -- CAIXA DE TEXTO TELEPORTE
-    local function CreateTextBox(yPos, placeholder, callback)
-        local box = Instance.new("TextBox")
-        box.Size = UDim2.new(1,0,0,24)
-        box.Position = UDim2.new(0,0,0,yPos)
-        box.BackgroundColor3 = Color3.fromRGB(35,35,50)
-        box.Text = ""
-        box.PlaceholderText = placeholder
-        box.TextColor3 = Color3.fromRGB(230,230,230)
-        box.Font = Enum.Font.Gotham
-        box.TextSize = 10
-        box.ClearTextOnFocus = false
-        box.Parent = content
-        Instance.new("UICorner", box).CornerRadius = UDim.new(0,4)
-        box.FocusLost:Connect(function() callback(box.Text) end)
+    -- 🎚️ SLIDER FOV
+    local function CreateSlider(texto, y, valorMin, valorMax, valorInicial, acao)
+        local Cont = Instance.new("Frame")
+        Cont.Size = UDim2.new(1, 0, 0, 36)
+        Cont.Position = UDim2.new(0, 0, 0, y)
+        Cont.BackgroundTransparency = 1
+        Cont.Parent = Content
+
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(1, 0, 0, 16)
+        Lbl.BackgroundTransparency = 1
+        Lbl.Text = texto .. ": " .. valorInicial
+        Lbl.Font = Enum.Font.Gotham
+        Lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
+        Lbl.TextSize = 11
+        Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.Parent = Cont
+
+        local BarBg = Instance.new("Frame")
+        BarBg.Size = UDim2.new(1, 0, 0, 12)
+        BarBg.Position = UDim2.new(0, 0, 0, 20)
+        BarBg.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+        BarBg.Parent = Cont
+        Instance.new("UICorner", BarBg).CornerRadius = UDim.new(0, 6)
+
+        local BarFill = Instance.new("Frame")
+        BarFill.Size = UDim2.new(0, (valorInicial-valorMin)/(valorMax-valorMin), 1, 0)
+        BarFill.BackgroundColor3 = Color3.fromRGB(220, 30, 60)
+        BarFill.Parent = BarBg
+        Instance.new("UICorner", BarFill).CornerRadius = UDim.new(0, 6)
+
+        local atualValor = valorInicial
+        local function Atualizar(input)
+            local pos = input.Position.X - BarBg.AbsolutePosition.X
+            local porcent = math.clamp(pos / BarBg.AbsoluteSize.X, 0, 1)
+            atualValor = math.floor(valorMin + (valorMax - valorMin) * porcent)
+            BarFill.Size = UDim2.new(porcent, 0, 1, 0)
+            Lbl.Text = texto .. ": " .. atualValor
+            acao(atualValor)
+        end
+        BarBg.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Atualizar(i) end
+        end)
+        BarBg.InputChanged:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then Atualizar(i) end
+        end)
     end
 
-    local y = 2
-    CreateToggle("🎯 Auto Aim", y, Settings.AutoAim, function(v) Settings.AutoAim=v if not v then CurrentTarget=nil end end)
-    y += 25
-    CreateToggle("💚 Auto Heal", y, Settings.AutoHeal, function(v) Settings.AutoHeal=v end)
-    y += 25
-    CreateToggle("👁️ ESP", y, Settings.ESP, function(v) Settings.ESP=v if not v then for _,o in pairs(ESPObjects) do pcall(function() o:Destroy() end) end ESPObjects={} end end)
-    y += 25
-    CreateToggle("🔴 Mostrar FOV", y, Settings.ShowFOV, function(v) Settings.ShowFOV=v if not v and FOVCircle then FOVCircle.Visible=false end end)
-    y += 25
+    -- 📋 LISTA DE JOGADORES
+    local ListaAberta = false
+    local ListaFrame = Instance.new("ScrollingFrame")
+    ListaFrame.Size = UDim2.new(1, 0, 0, 85)
+    ListaFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+    ListaFrame.ScrollBarThickness = 4
+    ListaFrame.Visible = false
+    ListaFrame.Parent = Content
+    Instance.new("UICorner", ListaFrame).CornerRadius = UDim.new(0, 8)
+    Instance.new("UIListLayout", ListaFrame).Padding = UDim.new(0, 4)
 
-    -- TELEPORTE
-    local teleLabel = Instance.new("TextLabel")
-    teleLabel.Size = UDim2.new(1,0,0,16)
-    teleLabel.Position = UDim2.new(0,0,0,y)
-    teleLabel.BackgroundTransparency = 1
-    teleLabel.Text = "🚀 Teleportar e Travar"
-    teleLabel.Font = Enum.Font.GothamBold
-    teleLabel.TextColor3 = Color3.fromRGB(255,200,0)
-    teleLabel.TextSize = 11
-    teleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    teleLabel.Parent = content
-    y += 18
-    CreateTextBox(y, "Nome do jogador...", function(text) Settings.TargetPlayerName = text end)
-    y += 28
-    CreateToggle("🔒 Seguir/Travar", y, Settings.TeleportLock, function(v) Settings.TeleportLock=v if not v then TeleportTarget=nil end end)
-    y += 30
+    local BtnLista = Instance.new("TextButton")
+    BtnLista.Size = UDim2.new(1, 0, 0, 30)
+    BtnLista.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    BtnLista.Text = "📋 Clique para selecionar jogador"
+    BtnLista.TextColor3 = Color3.fromRGB(220, 220, 220)
+    BtnLista.TextSize = 11
+    BtnLista.Font = Enum.Font.Gotham
+    BtnLista.Parent = Content
+    Instance.new("UICorner", BtnLista).CornerRadius = UDim.new(0, 8)
 
-    -- STATUS
-    local statusFrame = Instance.new("Frame")
-    statusFrame.Size = UDim2.new(1,0,0,20)
-    statusFrame.Position = UDim2.new(0,0,0,y)
-    statusFrame.BackgroundColor3 = Color3.fromRGB(70,70,85)
-    statusFrame.BackgroundTransparency = 0
-    statusFrame.Parent = content
-    Instance.new("UICorner", statusFrame).CornerRadius = UDim.new(0,4)
-    local statusText = Instance.new("TextLabel")
-    statusText.Size = UDim2.new(1,0,1,0)
-    statusText.BackgroundTransparency = 1
-    statusText.Text = "✅ INATIVO"
-    statusText.Font = Enum.Font.GothamBold
-    statusText.TextColor3 = Color3.fromRGB(255,255,255)
-    statusText.TextSize = 10
-    statusText.Parent = statusFrame
+    local function AtualizarLista()
+        for _, c in pairs(ListaFrame:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer then
+                local B = Instance.new("TextButton")
+                B.Size = UDim2.new(1, 0, 0, 28)
+                B.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+                B.Text = "👤 " .. p.Name
+                B.TextColor3 = Color3.fromRGB(240, 240, 240)
+                B.TextSize = 11
+                B.Font = Enum.Font.Gotham
+                B.Parent = ListaFrame
+                Instance.new("UICorner", B).CornerRadius = UDim.new(0, 6)
+                B.MouseButton1Click:Connect(function()
+                    Settings.TargetPlayer = p
+                    BtnLista.Text = "✅ Selecionado: " .. p.Name
+                    ListaAberta = false
+                    ListaFrame.Visible = false
+                end)
+            end
+        end
+        ListaFrame.CanvasSize = UDim2.new(0, 0, 0, #ListaFrame:GetChildren() * 32)
+    end
 
-    RunService.Heartbeat:Connect(function()
+    BtnLista.MouseButton1Click:Connect(function()
+        ListaAberta = not ListaAberta
+        if ListaAberta then
+            AtualizarLista()
+            ListaFrame.Visible = true
+            BtnLista.Text = "📋 Fechar lista"
+        else
+            ListaFrame.Visible = false
+            BtnLista.Text = "📋 Clique para selecionar jogador"
+        end
+    end)
+
+    -- 📊 COLUNAS DE FUNÇÕES
+    CreateToggle("🎯 Auto Aim", 0, 0, Settings.AutoAim, function(v) Settings.AutoAim = v end)
+    CreateToggle("⚡ Speed", 190, 0, Settings.Speed, function(v) Settings.Speed = v end)
+    CreateToggle("🦘 Super Jump", 0, 32, Settings.SuperJump, function(v) Settings.SuperJump = v end)
+    CreateToggle("👁️ ESP", 190, 32, Settings.ESP, function(v) Settings.ESP = v end)
+    CreateToggle("🔴 Mostrar FOV", 0, 64, Settings.ShowFOV, function(v) Settings.ShowFOV = v end)
+    CreateToggle("🔒 Seguir/Travar", 190, 64, Settings.TeleportLock, function(v)
+        Settings.TeleportLock = v
+        if not v then Settings.TargetPlayer = nil; BtnLista.Text = "📋 Clique para selecionar jogador" end
+    end)
+    CreateSlider("🎚️ Tamanho FOV", 96, 50, 400, Settings.FOVRadius, function(v) Settings.FOVRadius = v end)
+
+    local TeleLabel = Instance.new("TextLabel")
+    TeleLabel.Size = UDim2.new(1, 0, 0, 20)
+    TeleLabel.Position = UDim2.new(0, 0, 0, 150)
+    TeleLabel.BackgroundTransparency = 1
+    TeleLabel.Text = "🚀 Teleportar e Travar"
+    TeleLabel.Font = Enum.Font.GothamBold
+    TeleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+    TeleLabel.TextSize = 12
+    TeleLabel.Parent = Content
+
+    BtnLista.Position = UDim2.new(0, 0, 0, 175)
+    ListaFrame.Position = UDim2.new(0, 0, 0, 210)
+
+    -- ✅ STATUS
+    local Status = Instance.new("TextLabel")
+    Status.Size = UDim2.new(1, 0, 0, 28)
+    Status.Position = UDim2.new(0, 0, 0, 288)
+    Status.BackgroundColor3 = Color3.fromRGB(55, 55, 75)
+    Status.Text = "✅ INATIVO"
+    Status.Font = Enum.Font.GothamBold
+    Status.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Status.TextSize = 11
+    Status.Parent = Main
+    Instance.new("UICorner", Status).CornerRadius = UDim.new(0, 8)
+
+    game:GetService("RunService").Heartbeat:Connect(function()
         pcall(function()
-            if TeleportTarget then
-                statusFrame.BackgroundColor3 = Color3.fromRGB(255,180,0)
-                statusText.Text = "🚀 TRAVADO: "..TeleportTarget.Name
-            elseif CurrentTarget then
-                statusFrame.BackgroundColor3 = Color3.fromRGB(220,30,30)
-                statusText.Text = "⚔️ EM COMBATE"
+            if Settings.TeleportLock and Settings.TargetPlayer then
+                Status.Text = "🚀 TRAVADO: " .. Settings.TargetPlayer.Name
+                Status.BackgroundColor3 = Color3.fromRGB(255, 180, 0)
+            elseif Settings.AutoAim then
+                Status.Text = "⚔️ AUTO AIM ATIVO"
+                Status.BackgroundColor3 = Color3.fromRGB(220, 30, 30)
+            elseif Settings.Speed then
+                Status.Text = "⚡ SPEED ATIVO"
+                Status.BackgroundColor3 = Color3.fromRGB(0, 180, 60)
+            elseif Settings.SuperJump then
+                Status.Text = "🦘 SUPER JUMP ATIVO"
+                Status.BackgroundColor3 = Color3.fromRGB(0, 180, 60)
             else
-                statusFrame.BackgroundColor3 = Color3.fromRGB(70,70,85)
-                statusText.Text = "✅ INATIVO"
+                Status.Text = "✅ INATIVO"
+                Status.BackgroundColor3 = Color3.fromRGB(55, 55, 75)
             end
         end)
     end)
 
-    -- 🎯 SISTEMA DE ARRASTE — Cabeçalho inteiro arrasta
-    local function StartDrag(input)
+    -- 🖱️ ARRASTAR
+    local Arrastando, Inicio, PosInicial
+    local function Comecar(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            Dragging = true
-            DragStart = input.Position
-            StartPos = main.Position
+            Arrastando = true; Inicio = input.Position; PosInicial = Main.Position
         end
     end
-    local function UpdateDrag(input)
-        if Dragging then
-            local delta = input.Position - DragStart
-            main.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset+delta.X, StartPos.Y.Scale, StartPos.Y.Offset+delta.Y)
+    local function Mover(input)
+        if Arrastando then
+            local d = input.Position - Inicio
+            Main.Position = UDim2.new(PosInicial.X.Scale, PosInicial.X.Offset + d.X, PosInicial.Y.Scale, PosInicial.Y.Offset + d.Y)
         end
     end
-    local function StopDrag() Dragging = false end
+    local function Parar() Arrastando = false end
+    Header.InputBegan:Connect(Comecar); Header.InputChanged:Connect(Mover); Header.InputEnded:Connect(Parar)
+    Title.InputBegan:Connect(Comecar); Title.InputChanged:Connect(Mover); Title.InputEnded:Connect(Parar)
 
-    header.InputBegan:Connect(StartDrag)
-    header.InputChanged:Connect(UpdateDrag)
-    header.InputEnded:Connect(StopDrag)
-    title.InputBegan:Connect(StartDrag)
-    title.InputChanged:Connect(UpdateDrag)
-    title.InputEnded:Connect(StopDrag)
-
-    -- MINIMIZAR — Muda texto para □ / ─
-    minBtn.MouseButton1Click:Connect(function()
-        isMinimized = not isMinimized
-        if isMinimized then
-            main.Size = UDim2.new(0,180,0,32)
-            content.Visible = false
-            minBtn.Text = "─"
+    -- ✅ MINIMIZAR
+    local Minimizado = false
+    local TAMANHO_NORMAL = UDim2.new(0, 380, 0, 320)
+    local TAMANHO_MINIMIZADO = UDim2.new(0, 380, 0, 44)
+    MinBtn.MouseButton1Click:Connect(function()
+        Minimizado = not Minimizado
+        if Minimizado then
+            Main.Size = TAMANHO_MINIMIZADO; Content.Visible = false; Status.Visible = false; MinBtn.Text = "□"
+            ListaFrame.Visible = false; ListaAberta = false
         else
-            main.Size = UDim2.new(0,180,0,310)
-            content.Visible = true
-            minBtn.Text = "□"
+            Main.Size = TAMANHO_NORMAL; Content.Visible = true; Status.Visible = true; MinBtn.Text = "─"
         end
     end)
 
-    -- FECHAR — ✕
-    closeBtn.MouseButton1Click:Connect(function()
-        isRunning = false
-        screenGui:Destroy()
-        if FOVCircle then pcall(function() FOVCircle:Destroy() end) end
-        if AimLine then pcall(function() AimLine:Destroy() end) end
+    -- ❌ FECHAR — DIRETO + DESATIVA TUDO ✅
+    CloseBtn.MouseButton1Click:Connect(function()
+        DesativarTudo() -- ⚡ Desativa TUDO antes de fechar!
+        Gui:Destroy()
     end)
+
+    -- ✨ ABERTURA ANIMADA
+    Main.Size = UDim2.new(0, 0, 0, 0)
+    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+    Main.AnchorPoint = Vector2.new(0.5, 0.5)
+    Main.BackgroundTransparency = 1
+    Stroke.Transparency = 1
+    Content.Visible = false
+    Status.Visible = false
+
+    task.wait(0.03)
+    TweenService:Create(Main, TweenInfo.new(0.35, Enum.EasingStyle.Back), {
+        Size = TAMANHO_NORMAL,
+        Position = UDim2.new(0.02, 0, 0.12, 0),
+        AnchorPoint = Vector2.new(0, 0),
+        BackgroundTransparency = 0
+    }):Play()
+    TweenService:Create(Stroke, TweenInfo.new(0.35), {Transparency = 0}):Play()
+    task.wait(0.25)
+    Content.Visible = true
+    Status.Visible = true
 end
 
--- ========== INICIALIZAR ==========
-print("⚔️ Plínio Hub — Carregado!")
-print("✅ Cabeçalho vermelho + Nome branco")
-print("✅ Botão Amarelo □ = Minimizar")
-print("✅ Botão Vermelho ✕ = Fechar")
-print("✅ Arraste pelo cabeçalho")
-
-CreateFOVCircle()
-task.wait(0.1)
-CreateGUI()
-
-_G.Plinio = {
-    ToggleAim = function() Settings.AutoAim = not Settings.AutoAim end,
-    ToggleHeal = function() Settings.AutoHeal = not Settings.AutoHeal end,
-    ToggleESP = function() Settings.ESP = not Settings.ESP end,
-    SetFOV = function(r) Settings.FOVRadius = r if FOVCircle then FOVCircle.Radius = r end end,
-    SetTeleportTarget = function(n) Settings.TargetPlayerName = n end,
-    ToggleTeleport = function() Settings.TeleportLock = not Settings.TeleportLock end
-}
+-- ⏱️ ABRIR AUTOMATICAMENTE
+task.spawn(function()
+    LocalPlayer:GetAttributeChangedSignal("PlinioReady"):Connect(function()
+        if LocalPlayer:GetAttribute("PlinioReady") then OpenPanel() end
+    end)
+    task.wait(10)
+    if not PlayerGui:FindFirstChild("PlinioHubUI") then OpenPanel() end
+end)
